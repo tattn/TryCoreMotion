@@ -185,13 +185,21 @@ class PropertyListVC: UITableViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        startUpdates()
+    }
 
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        stopUpdates()
+    }
+
+    private func startUpdates() {
         motionManager.startDeviceMotionUpdates(using: .xArbitraryZVertical)
         motionManager.startAccelerometerUpdates()
         motionManager.startGyroUpdates()
         motionManager.startMagnetometerUpdates()
 
-        pedometer.startUpdates(from: Date().addingTimeInterval(-60*60*24)) { data, _ in
+        pedometer.startUpdates(from: Date().addingTimeInterval(-60 * 60 * 24)) { data, _ in
             self.pedometerData = data
         }
         pedometer.startEventUpdates { event, _ in
@@ -213,8 +221,7 @@ class PropertyListVC: UITableViewController {
         self.timer = timer
     }
 
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
+    private func stopUpdates() {
         timer?.invalidate()
         motionManager.stopDeviceMotionUpdates()
         motionManager.stopAccelerometerUpdates()
@@ -243,7 +250,14 @@ extension PropertyListVC {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let property = propertyList.sections[indexPath.section].rows[indexPath.row]
 
-        let cell = UITableViewCell(style: .value1, reuseIdentifier: "cell")
+        let cell: UITableViewCell = {
+            if let cell = tableView.dequeueReusableCell(withIdentifier: "cell") {
+                return cell
+            } else {
+                return UITableViewCell(style: .value1, reuseIdentifier: "cell")
+            }
+        }()
+
         cell.textLabel?.text = property.name
         cell.detailTextLabel?.text = property.stringValue
         cell.indentationLevel = property.indentationLevel
