@@ -16,7 +16,9 @@ struct PropertyList {
 class PropertyListVC: UITableViewController {
 
     fileprivate let motionManager = CMMotionManager()
+
     fileprivate var recoder: CMSensorRecorder?
+    fileprivate var recoderDataList: CMSensorDataList?
 
     fileprivate let pedometer = CMPedometer()
     fileprivate var pedometerData: CMPedometerData?
@@ -111,9 +113,16 @@ class PropertyListVC: UITableViewController {
                 ),
                 (
                     "Accelerometers", { () -> [TableViewCellPropertyType] in
-                        guard let logs = recoder?.accelerometerData(from: Date().addingTimeInterval(-60), to: Date()) else { return [] }
-                        return logs.map { data -> [TableViewCellPropertyType] in
-                            let log = data as! CMRecordedAccelerometerData
+                        let properties: [TableViewCellPropertyType] = [
+                            Property("isAccelerometerRecordingAvailable") { CMSensorRecorder.isAccelerometerRecordingAvailable() }
+                        ]
+
+                        // 🤔 CMSensorRecorder is only supported on the Apple Watch
+                        // https://stackoverflow.com/questions/32879316/devices-supporting-cmsensorrecorder
+
+                        guard let logs = self.recoderDataList else { return properties }
+                        return properties + logs.map { data -> [TableViewCellPropertyType] in
+                            let log = data as! CMRecordedAccelerometerData // supports type inference
                             return [
                                 Property("startDate", indent: 1) { log.startDate },
                                 Property("identifier", indent: 1) { log.identifier },
@@ -198,6 +207,8 @@ class PropertyListVC: UITableViewController {
         motionManager.startAccelerometerUpdates()
         motionManager.startGyroUpdates()
         motionManager.startMagnetometerUpdates()
+
+        recoderDataList = recoder?.accelerometerData(from: Date().addingTimeInterval(-60 * 60), to: Date())
 
         pedometer.startUpdates(from: Date().addingTimeInterval(-60 * 60 * 24)) { data, _ in
             self.pedometerData = data
