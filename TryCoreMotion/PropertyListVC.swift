@@ -203,7 +203,7 @@ class PropertyListVC: UITableViewController {
     }
 
     private func startUpdates() {
-        motionManager.startDeviceMotionUpdates(using: .xArbitraryZVertical)
+        motionManager.startDeviceMotionUpdates(using: .xTrueNorthZVertical) // xArbitraryZVertical
         motionManager.startAccelerometerUpdates()
         motionManager.startGyroUpdates()
         motionManager.startMagnetometerUpdates()
@@ -217,11 +217,11 @@ class PropertyListVC: UITableViewController {
             self.pedometerEvent = event
         }
 
-        altimeter.startRelativeAltitudeUpdates(to: OperationQueue()) { data, _ in
+        altimeter.startRelativeAltitudeUpdates(to: .init()) { data, _ in
             self.altitudeData = data
         }
 
-        motionActivityManager.startActivityUpdates(to: OperationQueue()) { activity in
+        motionActivityManager.startActivityUpdates(to: .init()) { activity in
             self.motionActivity = activity
         }
 
