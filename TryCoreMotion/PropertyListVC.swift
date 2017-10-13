@@ -117,9 +117,6 @@ class PropertyListVC: UITableViewController {
                             Property("isAccelerometerRecordingAvailable") { CMSensorRecorder.isAccelerometerRecordingAvailable() }
                         ]
 
-                        // 🤔 CMSensorRecorder is only supported on the Apple Watch
-                        // https://stackoverflow.com/questions/32879316/devices-supporting-cmsensorrecorder
-
                         guard let logs = self.recoderDataList else { return properties }
                         return properties + logs.map { data -> [TableViewCellPropertyType] in
                             let log = data as! CMRecordedAccelerometerData // supports type inference
